@@ -1,0 +1,342 @@
+\documentclass{article}
+% if you need to pass options to natbib, use, e.g.:
+\PassOptionsToPackage{numbers, square, compress}{natbib}
+% before loading neurips_2020
+% ready for submission
+% \usepackage{neurips_2020}
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+%     \usepackage[preprint]{neurips_2020}
+% to compile a camera-ready version, add the [final] option, e.g.:
+%     \usepackage[final]{neurips_2020}
+% to avoid loading the natbib package, add option nonatbib:
+\usepackage{neurips_2020}
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\hypersetup{
+    colorlinks=true,
+    linkcolor=cyan,
+    filecolor=magenta,      
+    urlcolor=blue,
+    citecolor=blue,
+}
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}
+\usepackage{graphicx}
+
+\title{Accelerated Charged Particle Tracking with Graph Neural Networks on FPGAs}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+\usepackage{xspace}
+\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}}
+\newcommand{\hlsfml}{\texttt{hls4ml}\xspace}
+
+\newcommand{\pt}{\ensuremath{p_{\mathrm{T}}}\xspace}
+
+
+\author{
+  Aneesh Heintz\thanks{These two authors contributed equally.} \\
+  Cornell Unviersity \\
+  Ithaca, NY 14850, USA\\
+  \And
+  Vesal Razavimaleki*, Javier Duarte\\
+  University of California San Diego\\
+  La Jolla, CA 92130, USA \\
+  \And
+  Gage DeZoort, Isobel Ojalvo, Savannah Thais \\
+  Princeton University \\
+  Princeton, NJ 08544, USA \\
+  \And
+  Markus Atkinson, Mark Neubauer\\
+  University of Illinois at Urbana-Champaign \\
+  Champaign, IL 61820, USA\\
+  \And
+  Lindsey Gray, Sergo Jindariani, Nhan Tran \\
+  Fermi National Accelerator Laboratory \\
+  Batavia, IL 60310, USA\\
+  \And
+  Philip Harris, Dylan Rankin \\
+  Massachusetts Institute of Technology \\
+  Batavia, IL 60310, USA\\
+  \And
+  Thea Aarrestad, Vladimir Loncar\thanks{Also at Institute of Physics Belgrade, Belgrad, Serbia}, Maurizio Pierini, Sioni Summers \\
+  European Organization for Nuclear Research (CERN) \\
+  CH-1211 Geneva 23, Switzerland
+  \And
+  Jennifer Ngadiuba \\
+  California Institute of Technology \\
+  Pasadena, CA 92115, USA
+  \And
+  Mia Liu \\
+  Purdue University \\
+  West Lafayette, IN 47907, USA
+  \And
+  Edward Kreinar\\
+  HawkEye360\\
+  Herndon, VA 20170, USA
+  \And
+  Zhenbin Wu\\
+  University of Illinois at Chicago\\
+  Chicago, IL 60607, USA
+}
+
+
+\begin{document}
+
+%\begin{flushright}
+%\TODO{FNAL Preprint Number?}
+%\end{flushright}
+
+\maketitle
+
+\begin{abstract}
+We develop and study FPGA implementations of algorithms for charged particle tracking based on graph neural networks. 
+The two complementary FPGA designs are based on OpenCL, a framework for writing programs that execute across heterogeneous platforms, and \hlsfml, a high-level-synthesis-based compiler for neural network to firmware conversion.
+We evaluate and compare the resource usage, latency, and tracking performance of our implementations based on a benchmark dataset.
+\end{abstract}
+
+\section{Introduction}
+
+In high energy physics (HEP), charged particle tracking~\cite{Amrouche:2019wmx,Strandlie:2010zz} is a crucial task necessary for the accurate determination of the kinematics of the particles produced in a collision event.
+%, including the position, direction, and momentum of the particles at their production points. 
+%This task leverages specialized detectors positioned close to the beam collision area in a strong magnetic field.
+%Charged particles created in the collisions bend in the magnetic field and ionize the material of these detectors, providing position measurements along the trajectory of each particle. 
+The object of tracking algorithms is to identify the trajectories of charged particles created in the collisions that bend in a magnetic field and ionize the material of detectors, providing position measurements along the trajectory of each particle.
+Current tracking algorithms~\cite{Chatrchyan:2014fea,Aaboud:2017all,combkalman1,combkalman2,combkalman3,kalman} scale worse than quadratically in the number of hits, which are expected to increase dramatically at higher beam intensities.% and for more granular sensitive detectors.
+This motivates the study of alternative algorithms with different computational scaling. 
+Another important consideration is the ability to accelerate these algorithms using heterogeneous computing resources like graphics processing units (GPUs) and field-programmable gate arrays (FPGAs).
+Recent efforts~\cite{Farrell:2018cjr,Ju:2020xty} have demonstrated the effectiveness of graph neural networks (GNNs) to correctly classify ``segments'' belonging to tracks.
+Graph-based approaches are well suited to this task because tracking data can be naturally encoded as a graph structure~\cite{Shlomi:2020gdn} and GNNs consider local information between pairs of hits to learn relationships between them in order to ``connect the dots'' to infer tracks.
+%In other words, track finding is an example of edge classification on a graph data structure.
+
+In this paper, we accelerate a GNN~\cite{Ju:2020xty} for segment classification, based on the interaction network (IN) architecture~\cite{Battaglia:2016jem,battaglia2018relational}, with FPGA implementations. 
+Such implementations enable efficient processing, in both speed and energy consumption for large HEP datasets.
+%being collected in HEP experiments now and in the future. 
+They may also enable the use of GNNs in the high-throughput, FPGA-based data filter system, known as the Level-1 trigger~\cite{ATLASL1T,ATLASP2L1T,CMSL1T,CMSP2L1T}, which has strict sub-microsecond latency requirements that only FPGAs or application-specific integrated circuits (ASICs) can meet.
+%In Section~\ref{sec:in}, we describe the structure of the IN model.
+We design two complementary implementations using OpenCL~\cite{OpenCL} and \hlsfml~\cite{Duarte:2018ite}, a specialized compiler for converting machine learning (ML) algorithms into FPGA firmware.
+We evaluate the resource usage, latency, and tracking performance of our implementations based on the benchmark TrackML dataset~\cite{Amrouche:2019wmx}.
+%Finally, we summarize our findings in Section~\ref{sec:summary}.
+
+\section{TrackML Data and Interaction Network Models}
+\label{sec:in}
+
+
+To benchmark the algorithms, we use the TrackML dataset~\cite{Amrouche:2019wmx}, which consists of simulated 3D measurements of particles coming from independent collision events at the LHC.
+%The training dataset contains the recorded hits, their ground truth counterpart and their association to particles, and the initial parameters of those particles, while the test dataset contains only the recorded hits.
+For our application, the data is embedded as a graph by considering the hits as nodes and pairs of hits on adjacent layers as edges
+The edges corresponding to true track segments are labeled as one and all others are labeled as zero.
+The goal of the segment classifier algorithm is to correctly classify the edges as true or spurious.
+
+We focus the scope of the task by considering the innermost layers of the detector, which usually correspond to the ``pixel'' detector of a modern HEP detector. 
+We consider two subdetector regions in the endcaps, consisting of 7 layers each, and one in the barrel of the TrackML detector, consisting of 4 layers.
+Edges are constructed from hit pairs on adjacent layers satisfying $\Delta z < 15$~cm and $\Delta\phi / \Delta r < 2.62\times 10^{-4}$.
+Particles with transverse momentum ($\pt$) greater than a given threshold are used to define the hits (nodes) and true edges.
+For the \hlsfml model, we consider graphs corresponding to particle $\pt>2$~GeV, while for the OpenCL implementation we study the scaling as a function of $\pt$ from 1 to 5~GeV. 
+A characteristic graph for a single event is shown in Fig.~\ref{fig:graphs} for $\pt>2$~GeV.
+The graph size depends strongly on the minimum $\pt$.
+For $\pt > 1$~GeV ($2$~GeV), the event graph contains approximately 5,300 (1,100) nodes and 16,600 (1,500) edges on average.
+%For instance, just the neural network inference in the \hlsfml model for a smaller sectorized graph requires  226~kFLOP.
+%\TODO{insert some numbers, average node/edges vs $\pt$}
+
+\begin{figure}[t]
+    \centering
+    %\includegraphics[width=0.8\textwidth,clip=true,viewport = 450 420 1470 660]{figures/TrackMLPixelDetector.pdf}\\
+    \includegraphics[width=0.33\textwidth,clip=true,viewport = 0 10 392 382]{figures/event000001000_section0_xy.pdf}
+    \includegraphics[width=0.33\textwidth,clip=true,viewport = 0 10 392 382]{figures/event000001000_section0_rz.pdf}\\~\\
+    \includegraphics[height=1.4cm,clip=true,viewport = 0 270 1920 710]{figures/hls4ml_GNN.pdf}
+    \includegraphics[height=1.4cm,clip=true,viewport = 150 270 1770 710]{figures/OpenCL_GNN.pdf}
+    \caption{
+    %TrackML detector regions labeled 7, 8, and 9, used in this study, consisting of 7, 4, and 4 layers, respectively (upper). 
+    A characteristic graph of particles with $\pt>2$~GeV for one event in $x$--$y$ view (upper left) and $r$--$z$ view (upper right).
+    The black edges correspond to true track segments, while the blue edges are spurious.
+    %While the OpenCL implementation uses the full graphs, the \hlsfml implementation considers segments of the graph corresponding to 8 sectors in $\phi$, and 2 sectors in $\eta$.
+    GNN architectures used for the \hlsfml (lower left) and OpenCL (lower right) implementations.}
+    \label{fig:graphs}
+\end{figure}
+
+Following the approach of Ref.~\cite{Farrell:2018cjr,Ju:2020xty}, we define a ``segment classifier'' using an IN model~\cite{Battaglia:2016jem,battaglia2018relational} to learn which edges connect hits belonging to the same track.
+Relative to Ref.~\cite{Ju:2020xty}, the model architecture is simplified for the more limited task and the FPGA implementations. 
+To implement it with \hlsfml, the model shown in Figure~\ref{fig:graphs} (lower left) is used.
+The same type of model is used for the OpenCL implementation, as shown in Figure~\ref{fig:graphs} (lower right), without encoder and decoder networks and a different IN structure.
+In addition, while both models consider the 3 input node features $(r, \phi, z)$, the \hlsfml model considers 4 input edge features $(\Delta r, \Delta\phi, \Delta z, \Delta R)$, while the OpenCL model does not consider any.
+Though we show results separately for these specific versions of the models, the \hlsfml and OpenCL implementations we developed are modular and flexible enough to accommodate both models as well as other permutations.
+Benchmarking the same model implemented in both frameworks is planned for future work.
+
+
+For the \hlsfml model, an encoder composed of two neural networks, $\phi_1^e$ and $\phi_1^v$, transforms input node and edge features into hidden representations.
+Both $\phi_1^e$ and $\phi_1^v$ have two layers with 8 neurons each and rectified linear unit (ReLU)~\cite{relu} activation functions.
+The IN is divided into two parts: an \emph{edge block} (or \emph{relational model}) and a \emph{node block} (or \emph{object model}).
+The edge block network $\phi_2^e$ takes as input a pair of node features with the corresponding edge features and has layers of sizes $(8, 8)$ with ReLU activation.
+The outputs of the $\phi_2^e$ are updated edge features, which can be considered ``messages'' sent between the nodes and aggregated at each node.
+The node block network $\phi_2^n$ takes as input the aggregated messages and the updated node features and consists of layers of sizes $(8, 8)$ with ReLU activation.
+Finally, the decoder network $\phi_3^v$ transforms edge features into an edge weight classifier (the probability for a given edge to be a true track segment), and has layers of sizes $(8, 8, 8, 1)$ with ReLU activation on all but the final layer that has a sigmoid activation.
+
+For the model used in the OpenCL implementation, the IN begins with an edge block where $\phi_2^e$ has layers of sizes $(250, 250, 250, 1)$ with ReLU activations except for the final layer.
+This is followed by a node block where $\phi_2^n$ has layers of sizes $(200, 200, 3)$ with ReLU activations except for the final layer.
+Subsequently, the same edge block is repeated and a sigmoid activation is applied to calculate the edge weights.
+The number of floating point operations (FLOP) for both of these models scales with the number of nodes, number of edges, and size of the neural networks. 
+
+\section{Implementations}
+\label{sec:impl}
+
+OpenCL is an open-source C-based interface for parallel computing on various hardware platforms, including CPUs, GPUs, digital signal processors (DSPs), and FPGAs, using task and data-based parallelism~\cite{OpenCL}.
+%It is an industry standard language to write hardware description language (HDL) at a high level, making it easier to program hardware accelerators. 
+%As a non-proprietary language, OpenCL provides a flexible and common interface across many types of hardware accelerators, greatly improving its potential use in a broad range of contexts.
+The OpenCL implementation of the IN adopts a CPU-plus-FPGA coprocessing approach where the host program on the CPU manages the application, and all computational operations are accelerated using dedicated kernels deployed on the FPGA that take capitalize on the device's hardware architecture to parallelize operations. 
+%These kernels are optimized during compilation for efficient execution. 
+%These kernels take advantage of the device's hardware architecture to parallelize task- and data-based operations. 
+%In our implementation of the IN, each kernel is implemented as an NDRange kernel, which provides explicit implementation of data parallelism during computation. 
+%% maybe too much detail:
+%NDRange kernels rely on partitioning data among work-items on the device. 
+%For example, each operation in a loop is executed on an individual work item in the work group.
+The matrix multiplication kernel is repeatedly executed during a forward pass of the network and leverages the FPGA architecture for an efficient data-parallel implementation. 
+This kernel uses both 2D local memory tiling and 2D register blocking to reduce the redundancy and latency of reading from globally shared off-chip memory. % that is inherent to a naive matrix multiplication example. 
+%2D memory tiling loads data from off-chip globally shared memory to local memory and computation is, therefore, based on local memory data. 
+%Register blocking goes further by sub-tiling the local memory and storing values into registers so that more work per thread is possible. 
+%Therefore, computation requires less access to local memory, leading to a higher percentage of fused multiply-accumulate (FMA) instructions. 
+Because the input graph sizes to the network changes per event, the matrix multiplication kernels pad each matrix before computing the result. Throughout the forward pass, several optimizations are made to speed up computation. 
+%The design process on optimizing the program focused on improving matrix multiplication operations, lowering device resource usage, and leveraging the inherent efficiencies of OpenCL.
+One example is the use of double buffering, which allows kernels to transfer data and execute instructions concurrently.
+%data relevant to the next kernel to be transferred while a preceding kernel is under execution. 
+%Therefore, runtimes are reduced by simultaneously executing kernels while transferring data in preparation of executing the next kernel.
+All loops iterations executed in the OpenCL kernels are ``unrolled'' to run in parallel, which decreases the latency at the cost of increased hardware resource consumption.
+%performed in parallel  unrolled to decrease the number of iterations that the offline compiler must execute. 
+%Although this comes at the expense of increased hardware resource consumption, kernel performance increases by decreasing the number of iterations of a loop the kernel executes.
+The OpenCL implementation is tested with %a 4-rack Intel Xeon computer cluster as the host and 
+an Intel Programmable Accelerator Card featuring an Arria 10 GX 1150 FPGA.
+
+%\section{\hlsfml Implementation}
+%\label{sec:hls4ml}
+\hlsfml~\cite{Duarte:2018ite} is an open-source converter of ML models into FPGA firmware utilizing Xilinx Vitis~\cite{vitis20192} high-level synthesis (HLS)~\cite{vivadohls} for both pure FPGA hardware applications and coprocessing kernels. 
+%HLS was created to accelerate the process of programming FPGAs, and \hlsfml provides an extra layer of abstraction to support ML.
+%\hlsfml reads in model architectures and weights trained with standard ML libraries and converts them to HLS. 
+%Included with \hlsfml is a library of common neural network building blocks which aid in the model conversion. 
+%From the HLS model, the vendor tools create a firmware design. 
+In addition to implementing a GNN using available \hlsfml tools, efforts are in progress to extend the compiler to support basic GNN building blocks.
+%The \hlsfml implementation accesses the inherent parallezation of FPGAs through preprocessor directives, or \emph{pragmas}, to lower the latency of model evaluation. 
+Each forward pass of IN is pipelined such that matrix multiplications are performed in parallel. 
+%Trade-offs between latency and resource utilization limit the realistic depth of parallelization possible. 
+%As such, the 
+Pipelining is performed at the level of the IN edge and node blocks %, and not in the dense neural network layers. 
+and the amount of pipelining is tunable through the \emph{reuse factor} parameter which controls the initiation interval (II) of each block.
+%Smaller graphs are less resource intensive, so the IN can be pipelined completely with an II of 1, while for larger graphs, less pipelining (larger II) reduces the FPGA resource consumption
+In conjunction with block-level pipelining, all loops are fully unrolled to decrease latency.
+All GNN model inputs are implemented with a streaming interface, which creates a FIFO that recycles its storage of array elements over each passage of a neural network block. 
+%Another feature of FPGAs implemented in the \hlsfml GNN is the streaming option. 
+%Arrays are by default implemented in RAM. 
+%Designating an array with a streaming pragma implements it as a FIFO that recycles its storage of array elements over each passage of a neural network block. 
+Streaming decreases resource utilization but may increase latency. 
+%However, the trade-off yields a net decrease in latency due to the concurrent pipelining. 
+%The \hlsfml implementation includes streaming for all model inputs as an option.
+The input graph size is truncated to 112 nodes and 148 edges, which corresponds to the 95th percentile graph size for the $\eta$ and $\phi$ sectors, and uses zero-padding to make the inputs a uniform size.
+To make scans of resources and timing more tractable, we further subdivide these graphs into quarters of up to 28 nodes and 37 edges just for the purposes of presentation.
+%To make scans of resources and timing more tractable, we  consider only up to 57 edges just for the purposes of presentation.
+Tests of the \hlsfml implementation target a Xilinx Kintex UltraScale (KU) 115 FPGA.
+
+\section{Results}
+\label{sec:results}
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.33\textwidth]{figures/resource_bit_precision_ocl.pdf}
+    \includegraphics[width=0.66\textwidth]{figures/scalability_study.pdf}
+    \caption{Resource system area analysis for the OpenCL implementation on an Arria 10 GX 1150 FPGA over multiple input data precision sizes (left). 
+    Scalability study in terms of latency versus minimum $\pt$ (center) and event size (right).}
+    \label{fig:ocl_precision_scalability}
+\end{figure}
+
+For the OpenCL implementation, Fig.~\ref{fig:ocl_precision_scalability} (left) compares the resource usage for input data represented with 8-, 16-, and 32-bit floating point precision.
+For most components, operating with lower precision typically leads to lower resource usage, though the system area is dependent on other factors as well.
+Execution times also increase with increasing precision from 8 to 32 bits, but not substantially, especially for lower minimum $\pt$.
+%For larger minimum $\pt$ requirements, the bit precision does not show a significant difference, but as the minimum $\pt$ decreases, i.e. as the input data size increases, the difference gets larger. 
+%The more significant metrics focus on the precision impacts on system area resource usage. 
+%, the study demonstrates there are ways to implement the same algorithms with a lighter systematic load. 
+Additionally, lower precision leads to smaller input data sizes, enabling the implementation to process events at lower $\pt$.
+
+Figure~\ref{fig:ocl_precision_scalability} shows how the OpenCL implementation scales with minimum $\pt$ (center) and input data size (right).
+Our implementation is able to process graphs with a minimum $\pt$ as low as 1~GeV, which is limited by hardware storage, such as host CPU RAM and on-device local RAM. 
+An increase in input data size increases the execution times. 
+The largest bottlenecks are matrix multiplication operations and the overhead time that accompanies the enqueueing the kernels. %enqueueing NDRange kernels.
+Even though this overhead time increases as graph input size increases, enqueueing becomes more efficient. %, as Fig.~\ref{fig:ocl_precision_scalability} (center and right) demonstrates.
+This scalability study shows that the coprocessing approach in OpenCL is flexible with respect to data size and can handle significant increases in data sizes.
+
+For the \hlsfml implementation, we first scan the fixed point precision total bit width to determine its impact on the physics performance of the algorithm as well as the latency and resource usage on the FPGA. 
+We evaluate the receiver operating characteristic (ROC) curve for the segment classifier, and use the area under the curve (AUC) as a performance metric. 
+Fig.~\ref{fig:hlsfml_scan} (far left) shows the AUC as a function of the total bit precision, while the integer part is fixed to 6 bits.
+We see that with 12 total bits, we effectively reproduce the 32-bit floating point model.
+Fig.~\ref{fig:hlsfml_scan} (center left) also shows the latency in clock cycles (for a 5~ns clock period) as a function of the total bit precision.
+We also scan the reuse factor at constant fixed point precision of $\langle16,6\rangle$, to study the resources and timing as a function of decreasing concurrency.
+Fig.~\ref{fig:hlsfml_scan} shows the latency (center left) and resource usage estimates (far right) versus reuse factor.
+By construction, the II for the algorithm is equal to the reuse factor.
+We note that the HLS lookup table (LUT) usage tends to be overestimated, while the HLS DSP usage tends to be accurate~\cite{Duarte:2018ite,Iiyama:2020wap,DiGuglielmo:2020eqx}.
+Nonetheless, to make the algorithm fit on a single FPGA, larger reuse factors or bigger FPGAs may be necessary.
+
+
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.24\textwidth]{figures/AUC_vs_BP.pdf}
+    \includegraphics[width=0.24\textwidth]{figures/Latency_vs_BP.pdf}    %\includegraphics[width=0.24\textwidth]{figures/Resources_vs_BP.pdf}
+    \includegraphics[width=0.24\textwidth]{figures/Latency_vs_RF.pdf}
+    \includegraphics[width=0.24\textwidth]{figures/Resources_vs_RF.pdf}
+    \caption{Segment classifier AUC versus fixed point precision total bit width (far left) for the \hlsfml implementation. 
+    Latency in clock cycles for a 5~ns clock period (center left) as a function of the total bit width for the \hlsfml implementation. 
+    The reuse factor (and thus II) is set to be 8.
+    Latency (center right) and resource usage estimates (far right) relative to the available resources on a Xilinx KU 115 FPGA versus reuse factor for fixed total bit precision of $\langle 16, 6\rangle$.}
+    \label{fig:hlsfml_scan}
+\end{figure}
+
+
+\section{Summary and Outlook}
+\label{sec:summary}
+
+We develop and study two complementary FPGA implementations of algorithms for charged particle tracking based on graph neural networks. 
+The first, using OpenCL, targets CPU-FPGA coprocessing applications and achieves a latency of between $1$~ms--$1$~s depending on the minimum $\pt$ for full event graphs, including data transfer and I/O, for the model under consideration.
+The second, using \hlsfml, targets both coprocessing and custom trigger (ultra low latency) applications and has an expected latency of 650~ns--1~$\mu$s, considering only the execution time on the FPGA, for smaller, sectorized input graphs and a more compact model, although more work is needed to reduce the resource consumption.
+Compared to CPU-based execution of the same models, the speedup is considerable, and may allow such algorithms to be used effectively in future computing workflows and the Level-1 trigger at the LHC.
+In future work, we plan to study detailed comparisons of the two implementations based on the same model, as well as comparing to GPU coprocessors~\cite{Krupa:2020bwg}.
+Other optimizations of the GNN model may also be possible, such as more efficient architectures~\cite{Iiyama:2020wap} and use of quantization-aware training~\cite{DiGuglielmo:2020eqx,Coelho:2020zfu} to reduce the necessary precision.
+
+\section*{Broader Impact}
+
+This work may be used to accelerate particle tracking and other reconstruction algorithms in high energy physics experiments.
+While accelerated machine learning on FPGAs has many potential benefits to science and society, including high-quality, fast data reconstruction and selection in experiments, automated detector control, or smarter IoT devices, it may also be used for nefarious purposes, such as surveillance or military unmanned aerial vehicles.
+%Authors are required to include a statement of the broader impact of their work, including its ethical aspects and future societal consequences. 
+%Authors should discuss both positive and negative outcomes, if any. For instance, authors should discuss a) who may benefit from this research, b) who may be put at disadvantage from this research, c) what are the consequences of failure of the system, and d) whether the task/method leverages biases in the data. 
+%If authors believe this is not applicable to them, authors can simply state this.
+
+%Use unnumbered first level headings for this section, which should go at the end of the paper. 
+%{\bf Note that this section does not count towards the eight pages of content that are allowed.}
+
+\begin{ack}
+
+We acknowledge the Fast Machine Learning collective as an open community of multi-domain experts and collaborators. 
+This community was important for the development of this project. 
+The simulations presented for the OpenCL implementation in this article were performed on computational resources managed and supported by Princeton Research Computing, a consortium of groups including the Princeton Institute for Computational Science and Engineering (PICSciE) and the Office of Information Technology's High Performance Computing Center and Visualization Laboratory at Princeton University.
+%% PRP Nautilus acknowledgement:
+Work for the \texttt{hls4ml} implementation was partially performed on the Pacific Research Platform Nautilus HyperCluster supported by NSF awards CNS-1730158, ACI-1540112, ACI-1541349, OAC-1826967, the University of California Office of the President, and the University of California San Diego's California Institute for Telecommunications and Information Technology/Qualcomm Institute. 
+Thanks to CENIC for the 100~Gpbs networks.
+
+A.~H. and V.~R. were supported by IRIS-HEP fellowships through the U.S. National Science Foundation (NSF) under Cooperative Agreement OAC-1836650.
+J.~D. is supported by the U.S. Department of Energy (DOE), Office of Science, Office of High Energy Physics Early Career Research program under Award No. DE-SC0021187.
+T.~A., V.~L., M.~P., and S.~S. are supported by the European Research Council (ERC) under the European Union's Horizon 2020 research and innovation program (Grant Agreement No. 772369).
+L.~G., S.~J., and N.~T. are supported by Fermi Research Alliance, LLC under Contract No. DE-AC02-07CH11359 with the U.S. Department of Energy (DOE), Office of Science, Office of High Energy Physics.
+P.~H. is supported by a Massachusetts Institute of Technology University grant. 
+Z.~W. is supported by the National Science Foundation under Grants No. 1606321 and 115164.
+
+\end{ack}
+
+\bibliographystyle{lucas_unsrt}
+\bibliography{references}
+\end{document}
