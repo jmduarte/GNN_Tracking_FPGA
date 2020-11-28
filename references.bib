@@ -486,8 +486,8 @@ isbn="978-3-030-29135-8"
 @inproceedings{vaswani2017attention,
   title={Attention is all you need},
   author={Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N and Kaiser, {\L}ukasz and Polosukhin, Illia},
-  booktitle="{Advances in Neural Information Processing Systems 30}",
-  series = "{NIPS 2017}",
+  booktitle="{Advances in Neural Information Processing Systems}",
+  volume = {30},
   pages={5998},
   archivePrefix = "arXiv",
   eprint = "1706.03762",
@@ -532,9 +532,9 @@ isbn="978-3-030-29135-8"
                Matthew Lai and
                Danilo Jimenez Rezende and
                Koray Kavukcuoglu},
-    title = "{Interaction Networks for Learning about Objects, Relations and Physics}",
-    booktitle = "{Advances in Neural Information Processing Systems 29}",
-    series = "NIPS 2016",
+    title = "Interaction Networks for Learning about Objects, Relations and Physics",
+    booktitle = "{Advances in Neural Information Processing Systems}",
+    volume = {29},
 archivePrefix = "arXiv",
 pages = {4502},
    eprint = {1612.00222},
@@ -634,6 +634,53 @@ pages = {4502},
     volume = "34",
     pages = "1930019",
     year = "2020"
+}
+
+@misc{tensorflow2015-whitepaper,
+title={ {TensorFlow}: Large-Scale Machine Learning on Heterogeneous Systems},
+url={https://www.tensorflow.org},
+author={
+    Mart\'{\i}n~Abadi and
+    Ashish~Agarwal and
+    Paul~Barham and
+    Eugene~Brevdo and
+    Zhifeng~Chen and
+    Craig~Citro and
+    Greg~S.~Corrado and
+    Andy~Davis and
+    Jeffrey~Dean and
+    Matthieu~Devin and
+    Sanjay~Ghemawat and
+    Ian~Goodfellow and
+    Andrew~Harp and
+    Geoffrey~Irving and
+    Michael~Isard and
+    Yangqing Jia and
+    Rafal~Jozefowicz and
+    Lukasz~Kaiser and
+    Manjunath~Kudlur and
+    Josh~Levenberg and
+    Dandelion~Man\'{e} and
+    Rajat~Monga and
+    Sherry~Moore and
+    Derek~Murray and
+    Chris~Olah and
+    Mike~Schuster and
+    Jonathon~Shlens and
+    Benoit~Steiner and
+    Ilya~Sutskever and
+    Kunal~Talwar and
+    Paul~Tucker and
+    Vincent~Vanhoucke and
+    Vijay~Vasudevan and
+    Fernanda~Vi\'{e}gas and
+    Oriol~Vinyals and
+    Pete~Warden and
+    Martin~Wattenberg and
+    Martin~Wicke and
+    Yuan~Yu and
+    Xiaoqiang~Zheng},
+  year={2015},
 }
 
 @misc{livingreview,
@@ -739,7 +786,6 @@ pages = {4502},
     reportNumber = "CMS-TRK-11-001, CERN-PH-EP-2014-070",
     doi = "10.1088/1748-0221/9/10/P10009",
     journal = "J. Instrum.",
-    number = "10",
     pages = "P10009",
     year = "2014"
 }
@@ -852,45 +898,34 @@ howpublished = "\url{https://twiki.cern.ch/twiki/bin/view/CMSPublic/CMSOfflineCo
 year = 2020
 }
 
-@unpublished{Iiyama:2020wap,
+@article{Iiyama:2020wap,
 author = "Yutaro Iiyama and others",
 title = "Distance-Weighted Graph Neural Networks on {FPGAs} for Real-Time Particle Reconstruction in High Energy Physics",
-note = "{Submitted to \emph{Front. Big Data}}",
+note = "{Accepted by \emph{Front. Big Data}}",
 eprint = "2008.03601",
 archivePrefix = "arXiv",
 primaryClass = "hep-ex",
 reportNumber = "FERMILAB-PUB-20-405-E-SCD",
 year = "2020",
-}
-
-
-@article{bnnpaper,
-      author         = "Di Guglielmo, Giuseppe and others",
-      title          = "{Compressing deep neural networks on FPGAs to binary and
-                        ternary precision with \texttt{hls4ml}}",
-      year           = "2020",
-      month = "6",
-      eprint         = "2003.06308",
-      archivePrefix  = "arXiv",
-      primaryClass   = "cs.LG",
-      note = "Accepted by \textit{Mach. Learn.: Sci. Technol.}",
-      doi = "10.1088/2632-2153/aba042",
-      SLACcitation   = "%%CITATION = ARXIV:2003.06308;%%"
+doi = "10.3389/fdata.2020.598927"
 }
 
 @article{Coelho:2020zfu,
     author = "Coelho, Claudionor N. and Kuusela, Aki and Zhuang, Hao and Aarrestad, Thea and Loncar, Vladimir and Ngadiuba, Jennifer and Pierini, Maurizio and Summers, Sioni",
-    title = "Ultra Low-latency, Low-area Inference Accelerators using Heterogeneous Deep Quantization with \textsc{QKeras} and \texttt{hls4ml}",
+    title = "{Automatic deep heterogeneous quantization of deep neural networks for ultra low-area, low-latency inference on the edge at particle colliders}",
     eprint = "2006.10159",
     archivePrefix = "arXiv",
     primaryClass = "physics.ins-det",
     month = "6",
-    year = "2020"
+    year = "2020",
+    note = "Submitted to \emph{Nat. Mach. Intell.}",
 }
 
 @ARTICLE{fpgadeep,  
 author={A. {Shawahna} and S. M. {Sait} and A. {El-Maleh}},  
-journal={IEEE Access},   title="{FPGA}-Based Accelerators of Deep Learning Networks for Learning and Classification: {A} Review",   year={2019},  
+journal={IEEE Access},   
+title="{FPGA}-Based Accelerators of Deep Learning Networks for Learning and Classification: {A} Review",   
+year={2019},  
 volume={7}, 
 pages={7823},   doi={10.1109/ACCESS.2018.2890150},  ISSN={2169-3536},
 archivePrefix = "arXiv",
@@ -967,7 +1002,8 @@ numpages = {12}
 @inproceedings{braindamage,
 title = "Optimal Brain Damage",
 author = {LeCun, Yann and John S. Denker and Sara A. Solla},
-booktitle = {Advances in Neural Information Processing Systems 2},
+booktitle = {Advances in Neural Information Processing Systems},
+volume = {2},
 editor = {D. S. Touretzky},
 pages = {598},
 year = {1990},
@@ -1025,7 +1061,8 @@ url = {http://papers.nips.cc/paper/250-optimal-brain-damage.pdf}
 @inproceedings{PVCNN,
 title = "Point-Voxel {CNN} for Efficient {3D} Deep Learning",
 author = {Liu, Zhijian and Tang, Haotian and Lin, Yujun and Han, Song},
-booktitle = {Advances in Neural Information Processing Systems 32},
+booktitle = {Advances in Neural Information Processing Systems},
+volume = {32},
 editor = {H. Wallach and H. Larochelle and A. Beygelzimer and F. d' Alch\'{e}-Buc and E. Fox and R. Garnett},
 pages = {965},
 year = {2019},
@@ -1157,7 +1194,8 @@ archivePrefix = "arXiv"
     primaryClass = "hep-ex",
     month = "7",
     year = "2020",
-    note = "Submitted to \emph{Mach. Learn.: Sci. Tech.}",
+    note = "Accepted by \emph{Mach. Learn.: Sci. Tech.}",
+    doi  = "10.1088/2632-2153/abbf9a"
 }
 
 @inproceedings{gat,
@@ -1183,7 +1221,8 @@ archivePrefix = "arXiv"
 @inproceedings{deepsets,
 title = {Deep Sets},
 author = {Zaheer, Manzil and Kottur, Satwik and Ravanbakhsh, Siamak and Poczos, Barnabas and Salakhutdinov, Russ R and Smola, Alexander J},
-booktitle = "{Advances in Neural Information Processing Systems 30}",
+booktitle = "{Advances in Neural Information Processing Systems}",
+volume = {30},
 editor = {I. Guyon and U. V. Luxburg and S. Bengio and H. Wallach and R. Fergus and S. Vishwanathan and R. Garnett},
 pages = {3391},
 year = {2017},
@@ -1231,6 +1270,20 @@ url = {http://papers.nips.cc/paper/6931-deep-sets.pdf}
   year={2019},
 }
 
+@incollection{pytorch,
+title = {{PyTorch}: An Imperative Style, High-Performance Deep Learning Library},
+author = {Paszke, Adam and Gross, Sam and Massa, Francisco and Lerer, Adam and Bradbury, James and Chanan, Gregory and Killeen, Trevor and Lin, Zeming and Gimelshein, Natalia and Antiga, Luca and Desmaison, Alban and Kopf, Andreas and Yang, Edward and DeVito, Zachary and Raison, Martin and Tejani, Alykhan and Chilamkurthy, Sasank and Steiner, Benoit and Fang, Lu and Bai, Junjie and Chintala, Soumith},
+booktitle = {Advances in Neural Information Processing Systems},
+volume = {32},
+editor = {H. Wallach and H. Larochelle and A. Beygelzimer and F. d\textquotesingle Alch\'{e}-Buc and E. Fox and R. Garnett},
+pages = {8024},
+year = {2019},
+publisher = {Curran Associates, Inc.},
+url = {http://papers.neurips.cc/paper/9015-pytorch-an-imperative-style-high-performance-deep-learning-library.pdf},
+      eprint={1912.01703},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
 @misc{graph_nets,
 author = "DeepMind",
 title = "graph\_nets",
@@ -1287,7 +1340,8 @@ year = 2019
 @inproceedings{NIPS2005_2795,
 title = {Distance Metric Learning for Large Margin Nearest Neighbor Classification},
 author = {Weinberger, Kilian Q and John Blitzer and Lawrence K. Saul},
-booktitle = {Advances in Neural Information Processing Systems 18},
+booktitle = {Advances in Neural Information Processing Systems},
+volume = {18},
 editor = {Y. Weiss and B. Sch\"{o}lkopf and J. C. Platt},
 pages = {1473},
 year = {2006},
@@ -1314,7 +1368,6 @@ url = {http://papers.nips.cc/paper/2795-distance-metric-learning-for-large-margi
         archivePrefix = "arXiv",
         primaryClass = "physics.comp-ph",
         reportNumber = "FERMILAB-PUB-20-338-E-SCD",
-        month = "7",
         note = "Submitted to \emph{Mach. Learn.: Sci. Technol.}",
         year = "2020",
     }
@@ -1339,8 +1392,11 @@ url = {http://papers.nips.cc/paper/2795-distance-metric-learning-for-large-margi
     archivePrefix = "arXiv",
     primaryClass = "physics.ins-det",
     reportNumber = "CERN-EP-2020-109",
-    month = "7",
-    year = "2020"
+    year = "2020",
+    doi = "10.1088/1748-0221/15/10/P10004",
+    journal = "J. Instrum.",
+    volume = "15",
+    pages = "P10004"
 }
 
 @techreport{ATLASP2L1T,
@@ -1362,8 +1418,11 @@ url = {http://papers.nips.cc/paper/2795-distance-metric-learning-for-large-margi
     archivePrefix = "arXiv",
     primaryClass = "hep-ex",
     reportNumber = "CMS-TRG-17-001, CERN-EP-2020-065",
-    month = "6",
-    year = "2020"
+    year = "2020",
+    doi = "10.1088/1748-0221/15/10/P10017",
+    journal = "J. Instrum.",
+    volume = "15",
+    pages = "P10017"
 }
 
 @techreport{CMSP2L1T,
@@ -1377,12 +1436,30 @@ url = {http://papers.nips.cc/paper/2795-distance-metric-learning-for-large-margi
 }
 
 
-@unpublished{relu,
-  author = {Agarap, Abien Fred},
-  title = "Deep Learning using Rectified Linear Units ({ReLU})",
-  eprint = {1803.08375},
-  archivePrefix = "arXiv",
-  year = {2018}
+@inproceedings{relu1,
+author = {Nair, Vinod and Hinton, Geoffrey E.},
+title = {Rectified Linear Units Improve Restricted {Boltzmann} Machines},
+year = {2010},
+isbn = {9781605589077},
+publisher = {Omnipress},
+address = {Madison, WI, USA},
+booktitle = {Proceedings of the 27th International Conference on International Conference on Machine Learning},
+pages = {807},
+location = {Haifa, Israel},
+series = {ICML'10}
+}
+
+@InProceedings{relu2, 
+title = {Deep Sparse Rectifier Neural Networks}, 
+author = {Xavier Glorot and Antoine Bordes and Yoshua Bengio}, 
+pages = {315}, 
+year = {2011}, editor = {Geoffrey Gordon and David Dunson and Miroslav Dudík}, 
+volume = {15}, 
+series = {Proceedings of Machine Learning Research}, 
+address = {Fort Lauderdale, FL, USA}, 
+month = {4}, 
+publisher = {JMLR}, 
+url = {http://proceedings.mlr.press/v15/glorot11a.html},  
 }
 
 @misc{vitis20192,
@@ -1410,10 +1487,7 @@ url = "https://www.xilinx.com/support/documentation/sw_manuals/xilinx2019_2/ug90
     archivePrefix = "arXiv",
     primaryClass = "cs.LG",
     reportNumber = "FERMILAB-PUB-20-167-PPD-SCD",
-    month = "3",
     year = "2020",
-    journal = "Mach. Learn.: Sci. Technol.",
-    page = "In Press",
+    note = "Accepted by \emph{Mach. Learn.: Sci. Technol.}",
     doi = "10.1088/2632-2153/aba042",
-    note = "In Press",
 }
