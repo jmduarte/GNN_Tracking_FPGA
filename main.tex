@@ -94,9 +94,10 @@
 
 \begin{document}
 
-%\begin{flushright}
-%\TODO{FNAL Preprint Number?}
-%\end{flushright}
+% for arXiv:
+\begin{flushright}
+FERMILAB-CONF-20-622-CMS-SCD
+\end{flushright}
 
 \maketitle
 
@@ -126,7 +127,7 @@ Such implementations enable efficient processing, in both speed and energy consu
 %being collected in HEP experiments now and in the future. 
 They may also enable the use of GNNs in the high-throughput, FPGA-based data filter system, known as the Level-1 trigger~\cite{ATLASL1T,ATLASP2L1T,CMSL1T,CMSP2L1T}, which has strict sub-microsecond latency requirements that only FPGAs or application-specific integrated circuits (ASICs) can meet.
 %In Section~\ref{sec:in}, we describe the structure of the IN model.
-We design two complementary implementations using OpenCL~\cite{OpenCL} and \hlsfml~\cite{Duarte:2018ite}, a specialized compiler for converting machine learning (ML) algorithms into FPGA firmware.
+We design two complementary implementations using OpenCL~\cite{OpenCL} and \hlsfml~\cite{Duarte:2018ite,vloncar_2020_4161550}, a specialized compiler for converting machine learning (ML) algorithms into FPGA firmware.
 We evaluate the resource usage, latency, and tracking performance of our implementations based on the benchmark TrackML dataset~\cite{Amrouche:2019wmx}.
 %Finally, we summarize our findings in Section~\ref{sec:summary}.
 
