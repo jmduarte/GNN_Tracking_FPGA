@@ -52,7 +52,7 @@
   \And
   Vesal Razavimaleki*, Javier Duarte\\
   University of California San Diego\\
-  La Jolla, CA 92130, USA \\
+  La Jolla, CA 92093, USA \\
   \And
   Gage DeZoort, Isobel Ojalvo, Savannah Thais \\
   Princeton University \\
@@ -70,7 +70,7 @@
   Massachusetts Institute of Technology \\
   Cambridge, MA, 02139, USA\\
   \And
-  Thea Aarrestad, Vladimir Loncar\thanks{Also at Institute of Physics Belgrade, Belgrad, Serbia}, Maurizio Pierini, Sioni Summers \\
+  Thea Aarrestad, Vladimir Loncar\thanks{Also at Institute of Physics Belgrade, Belgrad, Serbia.}, Maurizio Pierini, Sioni Summers \\
   European Organization for Nuclear Research (CERN) \\
   CH-1211 Geneva 23, Switzerland
   \And
@@ -116,7 +116,7 @@ In high energy physics (HEP), charged particle tracking~\cite{Amrouche:2019wmx,S
 The objective of tracking algorithms is to identify the trajectories of charged particles created in the collisions that bend in a magnetic field and ionize the material of detectors, providing position measurements along the trajectory of each particle.
 Current tracking algorithms~\cite{Chatrchyan:2014fea,Aaboud:2017all,combkalman1,combkalman2,combkalman3,kalman} scale worse than quadratically in the number of hits, which are expected to increase dramatically at higher beam intensities. % and for more granular sensitive detectors.
 This motivates the study of alternative algorithms with different computational scaling. 
-Another important consideration is the ability to accelerate these algorithms using heterogeneous computing resources like graphics processing units (GPUs) and field-programmable gate arrays (FPGAs).
+Another important consideration is the ability to accelerate these algorithms using highly-parallel heterogeneous computing resources like graphics processing units (GPUs) and field-programmable gate arrays (FPGAs) as further improvements in single-core CPU performance may be limited~\cite{breakdown,dennard}.
 Recent efforts~\cite{Farrell:2018cjr,Ju:2020xty} have demonstrated the effectiveness of graph neural networks (GNNs) to correctly classify ``segments'' belonging to tracks.
 Graph-based approaches are well suited to this task because tracking data can be naturally encoded as a graph structure~\cite{Shlomi:2020gdn} and GNNs consider local information between pairs of hits to learn relationships between them in order to ``connect the dots'' to infer tracks.
 %In other words, track finding is an example of edge classification on a graph data structure.
@@ -136,7 +136,7 @@ We evaluate the resource usage, latency, and tracking performance of our impleme
 
 To benchmark the algorithms, we use the TrackML dataset~\cite{Amrouche:2019wmx}, which consists of simulated 3D measurements of particles coming from independent collision events at the LHC.
 %The training dataset contains the recorded hits, their ground truth counterpart and their association to particles, and the initial parameters of those particles, while the test dataset contains only the recorded hits.
-For our application, the data is embedded as a graph by considering the hits as nodes and pairs of hits on adjacent layers as edges
+For our application, the data is embedded as a graph by considering the hits as nodes and pairs of hits on adjacent layers as edges.
 The edges corresponding to true track segments are labeled as one and all others are labeled as zero.
 The goal of the segment classifier algorithm is to correctly classify the edges as true or spurious.
 
@@ -312,7 +312,7 @@ We develop and study two complementary FPGA implementations of algorithms for ch
 The first, using OpenCL, targets CPU-FPGA coprocessing applications and achieves a latency of between $10$~ms--$1$~s depending on the minimum $\pt$ for full event graphs, including data transfer and I/O, for the model under consideration.
 The second, using \hlsfml, targets both coprocessing and custom trigger (ultra low latency) applications and has an expected latency of 650~ns--1~$\mu$s, considering only the execution time on the FPGA, for smaller, sectorized input graphs and a more compact model, although more work is needed to reduce the resource consumption.
 Compared to CPU-based execution of the same models, the speedup for the \hlsfml implementation is considerable, but further optimizations are needed to improve on the CPU latency for the OpenCL implementation.
-Continued development in this direction may allow such algorithms to be used effectively in future computing workflows and the Level-1 trigger at the LHC.
+Continued development in this direction may allow such algorithms to be used effectively in future computing workflows~\cite{Rankin:2020usv} and the Level-1 trigger at the LHC.
 In future work, we plan to study detailed comparisons of the two implementations based on the same model, as well as comparing to GPU coprocessors~\cite{Krupa:2020bwg}.
 Other optimizations of the GNN model may also be possible, such as more efficient architectures~\cite{Iiyama:2020wap} and use of quantization-aware training~\cite{DiGuglielmo:2020eqx,Coelho:2020zfu} to reduce the necessary precision.
 
@@ -359,7 +359,7 @@ In this model, the same architecture is used as the one implemented in OpenCL, e
 Figure~\ref{fig:hlsfml_scan_v2} shows the AUC (far left) and the latency in clock cycles for a 5~ns clock period (center left) as a function of the total bit precision, while the integer part is fixed to 6 bits.
 We see that above 16 total bits, the quantized model effectively reproduces the 32-bit floating point model.
 Figure~\ref{fig:hlsfml_scan_v2} also shows the latency (center left) and resource usage estimates (far right) versus reuse factor at a constant fixed point precision of $\langle16,6\rangle$.
-This small implemented model also reasonably fits on a single FPGA with a latency less than 1~$\mu$s.
+This small implemented model reasonably fits on a single FPGA with a latency less than 1~$\mu$s.
 
 \begin{figure}[htpb]
     \centering
@@ -367,7 +367,8 @@ This small implemented model also reasonably fits on a single FPGA with a latenc
     \includegraphics[width=0.24\textwidth]{figures/Latency_vs_BP_v2.pdf}    %\includegraphics[width=0.24\textwidth]{figures/Resources_vs_BP_v2.pdf}
     \includegraphics[width=0.24\textwidth]{figures/Latency_vs_RF_v2.pdf}
     \includegraphics[width=0.24\textwidth]{figures/Resources_vs_RF_v2.pdf}
-    \caption{Alternative GNN segment classifier model implemented in \hlsfml. AUC (far left) and latency (center left) in clock cycles for a 5~ns clock period as a function of the total bit width.
+    \caption{Alternative GNN segment classifier model implemented in \hlsfml.
+    AUC (far left) and latency (center left) in clock cycles for a 5~ns clock period as a function of the total bit width.
     The reuse factor (and thus II) is set to be 8.
     Latency (center right) and resource usage estimates (far right) relative to the available resources on a Xilinx KU 115 FPGA versus reuse factor for fixed total bit precision of $\langle 16, 6\rangle$.}
     \label{fig:hlsfml_scan_v2}
